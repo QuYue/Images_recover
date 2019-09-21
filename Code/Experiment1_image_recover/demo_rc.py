@@ -13,9 +13,9 @@ import numpy as np
 import argparse
 import sys
 sys.path.append('..') # add the path which includes the packages
-import image_recover.processing as processing
-import image_recover.model as model
-import image_recover.score as score
+import RC_reorder.processing as processing
+import RC_reorder.model as model
+import RC_reorder.score as score
 
 # %% Get the arguments from cmd.
 parser = argparse.ArgumentParser(description='A demo for RGB image recover.')
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     plt.ion()
     plt.figure(1) # show
     plt.subplot(1, 2, 1)
-    fluency = score.fluency(image_f)
+    fluency = score.Fluency_score(image_f)
     plt.imshow(image_f[0].transpose(1, 2, 0))
     plt.axis('off')
     plt.title('%s %d' %(image_name, fluency))
@@ -48,10 +48,12 @@ if __name__ == '__main__':
     # index0 = np.array(index0) # change to ndarray
     # plt.subplot(1, 2, 2) # show
     # plt.imshow(shuffle_image[0].transpose(1, 2, 0))
-    # fluency = score.fluency(shuffle_image)
+    # fluency = score.Fluency_score(shuffle_image)
     # plt.title('shuffle %d' %fluency)
     # plt.axis('off')
     # plt.draw()
+
+
     # %% Shuffle
     shuffle_image, index0 = processing.shuffle(image_f, axis=2)
     shuffle_image, index0 = processing.shuffle(shuffle_image, axis=3)
@@ -61,7 +63,7 @@ if __name__ == '__main__':
 
     plt.subplot(1, 2, 2) # show
     plt.imshow(shuffle_image[0].transpose(1, 2, 0))
-    fluency = score.fluency(shuffle_image)
+    fluency = score.Fluency_score(shuffle_image)
     plt.title('shuffle %d' %fluency)
     plt.axis('off')
     plt.draw()
@@ -70,16 +72,16 @@ if __name__ == '__main__':
     plt.figure(2)
     temp_image = shuffle_image
     for i in range(10):
-        recover = model.ImageRecover(temp_image)
+        recover = model.ImageReorder(temp_image)
         t_image = []
         fluency=[]
         new_image, index = recover.direct_greed()
         t_image.append(new_image)
-        fluency.append(score.fluency(t_image[-1]))
+        fluency.append(score.Fluency_score(t_image[-1]))
         for j in range(30):
             new_image, index = recover.svd_greed(j+1)
             t_image.append(new_image)
-            fluency.append(score.fluency(t_image[-1]))
+            fluency.append(score.Fluency_score(t_image[-1]))
         pos = np.array(fluency).argmin()
         print(pos)
         temp_image = t_image[pos]
@@ -90,5 +92,6 @@ if __name__ == '__main__':
 
         plt.axis('off')
         plt.draw()
+    print('10000000000000')
     plt.ioff()
     plt.show()

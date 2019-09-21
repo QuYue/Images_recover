@@ -4,12 +4,13 @@
 @Author  : QuYue
 @File    : score.py
 @Software: PyCharm
-Introduction: The score to evaluate the effect of the image recover.
+Introduction: Some scores to evaluate the effectiveness of image reordering
 """
 # %% Import Packages
 import numpy as np
 # %% Functions
 def __check(image):
+    # check input image's dimension
     if len(image.shape) == 4:
         pass
     elif len(image.shape) == 3:
@@ -22,6 +23,22 @@ def __check(image):
     return image
 
 def __distance_cal(vector1, vector2, type='L1'):
+    """
+    A function for calculation the distance between two vectors.
+    Parameters
+    ---------
+        input1: ndarray
+            vector1
+        input2: ndarray
+            vector2
+        type: string
+            The method of calculating the distance.(default:'L1')
+            'L1'(Manhattan Distance), 'L2'(Euclidean Distance), 'cos'(Cosine)
+    Returns
+    ---------
+        distance: float
+            The distance between two vectors
+    """
     if type == 'L1':
         distance = np.linalg.norm(vector1 - vector2, ord=1)
     elif type == 'L2':
@@ -33,10 +50,9 @@ def __distance_cal(vector1, vector2, type='L1'):
         distance = np.linalg.norm(vector1 - vector2, ord=1)
     return distance
 
-
-def fluency(image, distance='L1'):
+def Fluency_score(image, distance='L1'):
     """
-    A function for evaluate images' fluency.
+    A function for evaluating images' fluency.
     Parameters
     ---------
         image: ndarray
@@ -64,7 +80,56 @@ def fluency(image, distance='L1'):
         fluency_score +=  __distance_cal(image[i], image[i+1], type=distance)
     return fluency_score
 
-def Kendal(order1, order2):
+def Central_score(image):
+    """
+    A function for calculating images's central level.
+    Parameters
+    ---------
+        image: ndarray
+            The image for calculation central level. The dimension of this tensor can be :
+                (4)image_num * channels * row(the axis be calculated) * column
+                (3)image_num * row(the axis be calculated) * column
+                (2)row(the axis be calculated) * column
+    Return
+
+    """
+    pass
+
+def Symmetric_score(image):
+    """
+    A function for calculating images' symmetric level.
+    Parameters
+    ---------
+        image: ndarray
+            The image for calculation symmetric level. The dimension of this tensor can be :
+                (4)image_num * channels * row(the axis be calculated) * column
+                (3)image_num * row(the axis be calculated) * column
+                (2)row(the axis be calculated) * column
+    Returns
+    ---------
+        symmetric_score: float
+            The symmetry of the image.(from 0 to 1.)
+        symmetric_distance: float
+            The symmetry distance of the image
+    """
+    # check
+    image = __check(image)
+    if type(image) == type(None):
+        return None
+    # stack the images
+    image = np.hstack(np.vstack(image))
+    # normlization
+    if image.max() != image.min():
+        image_norm = (image - image.min())/(image.max()-image.min())
+    else:
+        image_norm = image
+    # calculation
+    L = int(image.shape[0]/2)
+    symmetric_distance = (((image[0:L, :] - image[-1:-L-1:-1, :])**2).sum(1)**0.5).sum()
+    symmetric_score = 1-((((image_norm[0:L, :] - image_norm[-1:-L-1:-1, :])**2).sum(1)**0.5).sum()/(L*image.shape[1]**0.5))
+    return symmetric_score, symmetric_distance
+
+def Kendall_score(order1, order2):
     """
     A function for calculating the Kendall rank correlation coefficient and Kendall tau rank distance between the two orders by Kendall tau distance.
     Parameters
@@ -106,6 +171,7 @@ def Kendal(order1, order2):
     k_coeff = k_coeff / (n * (n - 1) / 2)
     return k_coeff, k_distance
 
+
  #%% Main Function
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -126,7 +192,7 @@ if __name__ == '__main__':
     images = images.transpose(0, 3, 1, 2)
     for i in range(num):
         img = images[i].transpose(1, 2, 0)
-        fluency_score = fluency(img)
+        fluency_score = Fluency_score(img)
         plt.subplot(1, num, i+1)
         plt.imshow(img)
         plt.title(file[i].split('.')[0] + ' fluency:%d' %fluency_score)
@@ -135,5 +201,10 @@ if __name__ == '__main__':
     #%% Kendall tau distance
     order1 = [0, 3, 1, 6, 2, 5, 4]
     order2 = [1, 0, 3, 6, 4, 2, 5]
-    k_coeff, k_distance = Kendal(order1, order2)
-
+    k_coeff, k_distance = Kendall_score(order1, order2)
+    print('order1:')
+    print(order1)
+    print('order2:')
+    print(order2)
+    print('Kendall rank correlation coefficient: %.2f' %k_coeff)
+    print('Kendall tau rank distance: %d' %k_distance)

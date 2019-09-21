@@ -17,9 +17,9 @@ import models
 import drawing
 import sys
 sys.path.append('..') # add the path which includes the packages
-import image_recover.processing as processing
-import image_recover.model as model
-import image_recover.score as score
+import image_reorder.processing as processing
+import image_reorder.model as model
+import image_reorder.score as score
 
 # %% Get the arguments from cmd.
 parser = argparse.ArgumentParser(description='An experiment to compare the effect of image classification before and after restoration.')
@@ -87,8 +87,8 @@ if __name__ == '__main__':
     # direct greed
     recover = model.ImageRecover(data_shuffled)
     data_recover, index = recover.direct_greed()
-    fluency = score.fluency(data_recover)
-    k_coeff, k_distance = score.Kendal(index0[index], range(len(index)))
+    fluency = score.Fluency_score(data_recover)
+    k_coeff, k_distance = score.Kendall_score(index0[index], range(len(index)))
     if fluency < best_index[0]:
         best_index[1] = index
         best_index[0] = fluency
@@ -109,11 +109,11 @@ if __name__ == '__main__':
         plt.figure(2)
     for i in range(1, 21):
         data_recover2, index = recover.svd_greed(u_num=i)
-        fluency = score.fluency(data_recover2)
+        fluency = score.Fluency_score(data_recover2)
         if fluency < best_index[0]:
             best_index[1] = index
             best_index[0] = fluency
-        k_coeff, k_distance = score.Kendal(index0[index], range(len(index)))
+        k_coeff, k_distance = score.Kendall_score(index0[index], range(len(index)))
         if Args.show:
             plt.subplot(4, 5, i)
             datasets.demo_show(data_recover2[num_index], datasets_name)

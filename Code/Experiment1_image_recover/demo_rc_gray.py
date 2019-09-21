@@ -13,9 +13,9 @@ import numpy as np
 import argparse
 import sys
 sys.path.append('..') # add the path which includes the packages
-import image_recover.processing as processing
-import image_recover.model as model
-import image_recover.score as score
+import RC_reorder.processing as processing
+import RC_reorder.model as model
+import RC_reorder.score as score
 
 # %% Get the arguments from cmd.
 parser = argparse.ArgumentParser(description='A demo for gray image recover.')
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     gray_image = processing.rgb2gray(image)
     plt.subplot(1, 3, 2) # show
     plt.imshow(gray_image, cmap='gray')
-    fluency = score.fluency(gray_image)
+    fluency = score.Fluency_score(gray_image)
     plt.axis('off')
     plt.title('%s-Gray %d' %(image_name, fluency))
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     plt.subplot(1, 3, 3) # show
     plt.imshow(shuffle_image, cmap='gray')
-    fluency = score.fluency(shuffle_image)
+    fluency = score.Fluency_score(shuffle_image)
     plt.title('shuffle %d' %fluency)
     plt.axis('off')
     plt.draw()
@@ -66,16 +66,16 @@ if __name__ == '__main__':
     plt.figure(2)
     temp_image = shuffle_image
     for i in range(10):
-        recover = model.ImageRecover(temp_image)
+        recover = model.ImageReorder(temp_image)
         t_image = []
         fluency=[]
         new_image3, index = recover.direct_greed()
         t_image.append(new_image3[0][0])
-        fluency.append(score.fluency(t_image[-1]))
+        fluency.append(score.Fluency_score(t_image[-1]))
         for j in range(40):
             new_image3, index = recover.svd_greed(j+1)
             t_image.append(new_image3[0][0])
-            fluency.append(score.fluency(t_image[-1]))
+            fluency.append(score.Fluency_score(t_image[-1]))
         pos = np.array(fluency).argmin()
         print(pos)
         temp_image = t_image[pos]

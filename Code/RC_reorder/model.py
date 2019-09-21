@@ -4,72 +4,75 @@
 @Author  : QuYue
 @File    : model.py
 @Software: PyCharm
-Introduction: the models for picture recover
+Introduction: Models for matrices' rows and columns reordering.
 """
 #%% Import Packages
 import numpy as np
 from numpy import linalg as la
 #%% Models
-class ImageRecover():
-    # the image recover algorithms
+class ImageReorder():
+    # the image recorder algorithms
     def __init__(self, image):
         """
-        A class for recovering images which has been shuffled.
+        A class for reordering images which have been shuffled.
         Parameters
         ---------
             image: ndarray
-                The image for calculation fluency. The dimension of this tensor can be :
+                The image for calculating fluency. The dimension of this tensor can be :
                     (4)image_num * channels * row(be shuffled) * column
                     (3)image_num * row(be shuffled) * column
                     (2)row(be shuffled) * column
         """
         image = self.check(image)
-        self.image = image                   # image(image_num * channels * row(be shuffled) * column)
+        self.image = image                # image(image_num * channels * row(be shuffled) * column)
         self.L = self.image.shape[2]      # the length of the shuffled axis
 
     def check(self, image):
+
         if len(image.shape) == 4:
             pass
         elif len(image.shape) == 3:
-            image = image[:, np.newaxis, ...]
+            image = image[:, np.newaxis, ...] # add channels' number
         elif len(image.shape) == 2:
-            image = image[np.newaxis, np.newaxis, ...]
+            image = image[np.newaxis, np.newaxis, ...] # add images' and channels' number
         else:
             print('Please input the right image(image_num * channels * row(be shuffled) * column)')
             image = None
         return image
 
     def distance_cal(self, vector, matrix):
-        # calculate the distance between the vector to every rows from the matrix (vector:(n,), matrix:(i, n))
+        # calculate the distances between the vector and every rows from the matrix (vector:(n,), matrix:(i, n))
         if len(matrix.shape) == 1:         # if matrix is a vector
-            matrix = matrix[np.newaxis, :] # add a axis
+            matrix = matrix[np.newaxis, :] # add an axis
         distance = np.sum((vector - matrix) ** 2, axis=1)
         return distance
 
     def update(self, flag='first'):
         # update the memory
-        if len(self.unused) == 0: # if 'unused' has no element（the recover is over）
+        if len(self.unused) == 0: # if 'unused' has no element, which means that the reordering is over
             return None
-        if flag == 'first': # find the closest row with the first row from the 'unused'
+        if flag == 'first': # find the closest row to the first row from the 'unused'
             dis = self.distance_cal(self.feature[self.used[0], :], self.feature[self.unused, :])
             ind = np.argmin(dis)
             self.memory[0], self.memory[2] = self.unused[ind], dis[ind] # update the memory
-        elif flag == 'last': # find the closest row with the last row from the 'unused'
+        elif flag == 'last': # find the closest row to the last row from the 'unused'
             dis = self.distance_cal(self.feature[self.used[-1], :], self.feature[self.unused, :])
             ind = np.argmin(dis)
-            self.memory[1], self.memory[3] = self.unused[ind], dis[ind]  # update the memory
+            self.memory[1], self.memory[3] = self.unused[ind], dis[ind] # update the memory
         else:
-            print('flag = first or last')
+            print("flag should be 'first' or 'last'.")
 
     def greed(self, seed=None):
+        # greed algorithm
         np.random.seed(seed=seed)  # set the random seed
         self.used = []                    # used row
         self.unused = list(range(self.L)) # unused row
         first = np.random.randint(self.L) # choose one row randomly
         self.used.append(first)
         self.unused.remove(first)
-        self.memory = [1, 1, 1, 1] # the memory is [the index of the closest row with the first ，the index of the closest row with the last，
-                                   # the distance between the closest row to the first， the distance between the closest row to the last]
+        self.memory = [1, 1, 1, 1] # the memory is a list including 4 elements. To be more specific:
+                                   # [the index of the closest row to 'first' ，the index of the closest row to 'last'，
+                                   # the distance between 'first' and its closest row， the distance between 'last' and its closest row]
         self.update('first')
         self.update('last')
         first, last = self.used[0], self.used[-1] # the first row, the last row
@@ -91,15 +94,17 @@ class ImageRecover():
         return self.used
 
     def svd_imsort(self, seed=None):
+        # SVD image sort algorithm
         new_image, index = self.svd_greed(u_num=1, seed=seed)
         return new_image, index
 
     def svd_greed(self, u_num=3, seed=None):
+        # SVD greed algorithm
         if u_num == 0:
             return self.image
         feature = []
         for img in self.image:
-            img = np.hstack(img) # channels stack
+            img = np.hstack(img) # stack channels
             u, sigma, vt = la.svd(img)
             feature.append(u[:, :u_num])
         self.feature = np.hstack(feature)
@@ -108,6 +113,7 @@ class ImageRecover():
         return new_image, index
 
     def direct_greed(self, seed=None):
+        # directly greed algorithm
         self.feature = np.hstack(np.vstack(self.image))
         index = self.greed(seed)
         new_image = self.image[:, :, index, :]
@@ -121,7 +127,7 @@ if __name__ == '__main__':
     import processing
     #%% Arguments
     path = './images/'
-    file = ['YaoMing.jpg', 'Kim.jpg', 'Hanazawa.jpg']
+    file = ['YaoMing.jpg', 'Kim.jpg', 'Hanazawa.jpg'] # images for testing
     num = len(file)
     # %% Read images
     plt.figure(1, figsize=(num * 2, 8))
@@ -143,18 +149,17 @@ if __name__ == '__main__':
         plt.imshow(img_s)
         plt.title('Shuffled')
         plt.axis('off')
-    #%% SVD imsort
-    recover = ImageRecover(images)
-    images_r0, _ = recover.svd_imsort()
+    #%% SVD image sort
+    reorder = ImageReorder(images)
+    images_r0, _ = reorder.svd_imsort()
     for i in range(num):
         img_r = images_r0[i].transpose(1, 2, 0)
         plt.subplot(5, num, i+num*2+1)
         plt.imshow(img_r)
         plt.title('SVD imsort')
         plt.axis('off')
-    #%% Direct greed
-    recover = ImageRecover(images)
-    images_r1, _ = recover.direct_greed()
+    #%% Directly greed
+    images_r1, _ = reorder.direct_greed()
     for i in range(num):
         img_r = images_r1[i].transpose(1, 2, 0)
         plt.subplot(5, num, i+num*3+1)
@@ -162,7 +167,7 @@ if __name__ == '__main__':
         plt.title('Direct greed')
         plt.axis('off')
     #%% SVD greed
-    images_r2, _ = recover.svd_greed(u_num=10)
+    images_r2, _ = reorder.svd_greed(u_num=10)
     for i in range(num):
         img_r = images_r2[i].transpose(1, 2, 0)
         plt.subplot(5, num, i+num*4+1)

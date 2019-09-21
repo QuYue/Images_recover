@@ -16,8 +16,8 @@ import models
 import drawing
 import sys
 sys.path.append('..') # add the path which includes the packages
-import image_recover.processing as processing
-import image_recover.model as model
+import image_reorder.processing as processing
+import image_reorder.model as model
 
 # %% Get the arguments from cmd.
 parser = argparse.ArgumentParser(description='A baseline experiment of image classification.')

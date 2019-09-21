@@ -4,9 +4,9 @@
 @Author  : QuYue
 @File    : __init__.py.py
 @Software: PyCharm
-Introduction:
+Introduction: A package for matrices' rows and columns reordering.
 """
 
 #%% Main Function
 if __name__ == '__main__':
-    print('This is the package for image recover from shuffled.')
+    print("This is a package for matrices' rows and columns reordering.")
