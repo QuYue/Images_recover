@@ -86,5 +86,6 @@ if __name__ == '__main__':
 
         plt.axis('off')
         plt.draw()
+    # %%
     plt.ioff()
     plt.show()
