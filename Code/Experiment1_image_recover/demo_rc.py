@@ -92,6 +92,6 @@ if __name__ == '__main__':
 
         plt.axis('off')
         plt.draw()
-    print('10000000000000')
+    # %%
     plt.ioff()
     plt.show()
