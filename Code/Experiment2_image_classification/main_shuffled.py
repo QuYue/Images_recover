@@ -85,7 +85,7 @@ if __name__ == '__main__':
     index0 = np.array(index0) # change to ndarray
     best_index = [float('inf'), []]
     # direct greed
-    recover = model.ImageRecover(data_shuffled)
+    recover = model.ImageReorder(data_shuffled)
     data_recover, index = recover.direct_greed()
     fluency = score.Fluency_score(data_recover)
     k_coeff, k_distance = score.Kendall_score(index0[index], range(len(index)))
