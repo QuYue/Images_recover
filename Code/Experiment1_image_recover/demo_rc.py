@@ -43,24 +43,9 @@ if __name__ == '__main__':
     plt.axis('off')
     plt.title('%s %d' %(image_name, fluency))
 
-    # # %% Shuffle
-    # shuffle_image, index0  = processing.shuffle(image_f, axis=2)
-    # index0 = np.array(index0) # change to ndarray
-    # plt.subplot(1, 2, 2) # show
-    # plt.imshow(shuffle_image[0].transpose(1, 2, 0))
-    # fluency = score.Fluency_score(shuffle_image)
-    # plt.title('shuffle %d' %fluency)
-    # plt.axis('off')
-    # plt.draw()
-
-
     # %% Shuffle
-    shuffle_image, index0 = processing.shuffle(image_f, axis=2)
-    shuffle_image, index0 = processing.shuffle(shuffle_image, axis=3)
-    shuffle_image, index0 = processing.shuffle(shuffle_image, axis=2)
-    shuffle_image, index0 = processing.shuffle(shuffle_image, axis=3)
-
-
+    shuffle_image, index_r0 = processing.shuffle(image_f, axis=2)
+    shuffle_image, index_c0 = processing.shuffle(shuffle_image, axis=3)
     plt.subplot(1, 2, 2) # show
     plt.imshow(shuffle_image[0].transpose(1, 2, 0))
     fluency = score.Fluency_score(shuffle_image)
