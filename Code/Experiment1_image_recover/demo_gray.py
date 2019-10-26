@@ -23,6 +23,8 @@ parser.add_argument('-i', '--image', type=str, default='lena.jpg', metavar='str'
                     help="the name of the image. (default: 'lena.jpg' )")
 parser.add_argument('-p', '--path', type=str, default='../../Data/Images/', metavar='str',
                     help="the path of the picture. (default: '../../Data/Images/')")
+parser.add_argument('-rc', '--RowColumn', action='store_true', default=False,
+                    help="if reorder both row and column. (default: False)")
 Args = parser.parse_args() # the Arguments
 
 #%% Main Function
